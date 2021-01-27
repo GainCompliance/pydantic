@@ -51,6 +51,8 @@ from .utils import (
     validate_field_name,
 )
 
+NOOP_TYPES = {int, float, str, bytes, bool, type(None)}
+
 if TYPE_CHECKING:
     from inspect import Signature
 
@@ -695,6 +697,9 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
         exclude_none: bool,
     ) -> Any:
 
+        value_type = type(v)
+        if value_type in NOOP_TYPES:
+            return v
         if isinstance(v, BaseModel):
             if to_dict:
                 v_dict = v.dict(
