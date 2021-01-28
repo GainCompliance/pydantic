@@ -2,11 +2,12 @@ import json
 import sys
 import warnings
 from abc import ABCMeta
+from collections import deque
 from copy import deepcopy
 from enum import Enum
 from functools import partial
 from pathlib import Path
-from types import FunctionType
+from types import FunctionType, GeneratorType
 from typing import (
     TYPE_CHECKING,
     AbstractSet,
@@ -52,6 +53,7 @@ from .utils import (
 )
 
 NOOP_TYPES = {int, float, str, bytes, bool, type(None)}
+SHORT_CIRCUIT_TYPES = {list, tuple, set, frozenset, GeneratorType, deque}
 
 if TYPE_CHECKING:
     from inspect import Signature
@@ -700,7 +702,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
         value_type = type(v)
         if value_type in NOOP_TYPES:
             return v
-        if isinstance(v, BaseModel):
+        if value_type == BaseModel or isinstance(v, BaseModel):
             if to_dict:
                 v_dict = v.dict(
                     by_alias=by_alias,
@@ -719,7 +721,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
         value_exclude = ValueItems(v, exclude) if exclude else None
         value_include = ValueItems(v, include) if include else None
 
-        if isinstance(v, dict):
+        if value_type == dict or isinstance(v, dict):
             return {
                 k_: cls._get_value(
                     v_,
@@ -736,7 +738,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
                 and (not value_include or value_include.is_included(k_))
             }
 
-        elif sequence_like(v):
+        elif value_type in SHORT_CIRCUIT_TYPES or sequence_like(v):
             return v.__class__(
                 cls._get_value(
                     v_,
@@ -753,7 +755,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
                 and (not value_include or value_include.is_included(i))
             )
 
-        elif isinstance(v, Enum) and getattr(cls.Config, 'use_enum_values', False):
+        elif (value_type == Enum or isinstance(v, Enum)) and getattr(cls.Config, 'use_enum_values', False):
             return v.value
 
         else:
