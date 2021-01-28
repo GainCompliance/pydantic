@@ -53,7 +53,7 @@ from .utils import (
 )
 
 NOOP_TYPES = {int, float, str, bytes, bool, type(None)}
-SHORT_CIRCUIT_TYPES = {list, tuple, set, frozenset, GeneratorType, deque}
+SEQUENCE_SHORT_CIRCUIT_TYPES = {list, tuple, set, frozenset, GeneratorType, deque}
 
 if TYPE_CHECKING:
     from inspect import Signature
@@ -702,7 +702,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
         value_type = type(v)
         if value_type in NOOP_TYPES:
             return v
-        if value_type == BaseModel or isinstance(v, BaseModel):
+        if isinstance(v, BaseModel):
             if to_dict:
                 v_dict = v.dict(
                     by_alias=by_alias,
@@ -738,7 +738,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
                 and (not value_include or value_include.is_included(k_))
             }
 
-        elif value_type in SHORT_CIRCUIT_TYPES or sequence_like(v):
+        elif value_type in SEQUENCE_SHORT_CIRCUIT_TYPES or sequence_like(v):
             return v.__class__(
                 cls._get_value(
                     v_,
@@ -755,7 +755,7 @@ class BaseModel(Representation, metaclass=ModelMetaclass):
                 and (not value_include or value_include.is_included(i))
             )
 
-        elif (value_type == Enum or isinstance(v, Enum)) and getattr(cls.Config, 'use_enum_values', False):
+        elif isinstance(v, Enum) and getattr(cls.Config, 'use_enum_values', False):
             return v.value
 
         else:
