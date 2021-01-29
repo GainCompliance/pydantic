@@ -294,6 +294,7 @@ jobs:
       #   env:
       #     NETLIFY: ${{ secrets.netlify_token }}
 
+
       - name: upload to GainCompliance gemfury
         run: twine upload --repository-url https://pypi.fury.io/gain-bot/ --username $GEMFURY_TOKEN --password "" dist/*
         env:
