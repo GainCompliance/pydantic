@@ -91,7 +91,7 @@ if not any(arg in sys.argv for arg in ['clean', 'check']) and 'SKIP_CYTHON' not 
             compiler_directives=compiler_directives,
         )
 
-setup(
+setup_dict = dict(
     name='pydantic',
     version=str(version.VERSION),
     description=description,
@@ -135,3 +135,10 @@ setup(
     },
     ext_modules=ext_modules,
 )
+
+setup_dict.update(dict(
+    name="pygain-pydantic",
+    url="https://github.com/GainCompliance/pydantic",
+))
+
+setup(**setup_dict)

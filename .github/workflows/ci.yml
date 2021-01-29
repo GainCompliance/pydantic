@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - gain-master
     tags:
       - '**'
   pull_request: {}
@@ -191,7 +191,7 @@ jobs:
   build:
     name: build py3.${{ matrix.python-version }} on ${{ matrix.platform || matrix.os }}
     needs: [lint, test-linux, test-windows-mac, test-fastapi]
-    if: "success() && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master')"
+    if: "success() && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/gain-master')"
     strategy:
       fail-fast: false
       matrix:
@@ -283,13 +283,18 @@ jobs:
       - name: check tag
         run: ./tests/check_tag.py
 
-      - name: upload to pypi
-        run: twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.pypi_token }}
+      # - name: upload to pypi
+      #   run: twine upload dist/*
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.pypi_token }}
 
-      - name: publish docs
-        run: make publish-docs
+      # - name: publish docs
+      #   run: make publish-docs
+      #   env:
+      #     NETLIFY: ${{ secrets.netlify_token }}
+
+      - name: upload to GainCompliance gemfury
+        run: twine upload --repository-url https://pypi.fury.io/gain-bot/ --username $GEMFURY_TOKEN --password "" dist/*
         env:
-          NETLIFY: ${{ secrets.netlify_token }}
+          GEMFURY_TOKEN: ${{ secrets.gemfury_token }}
