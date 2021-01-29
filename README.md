@@ -1,3 +1,13 @@
+# IMPORTANT: Fork dev
+all changes should go into `gain-master` branch
+## Cutting a release :*MANUAL PROCESS*:
+1) change the VERSION in `pydantic/version.py`
+    a) this version should match the version of master in pydantic that the branch is currently up to date + our own revision E.G. `pydantic` master is `1.5.6` our version should be `1.5.6a1`
+    b) if we are making changes and bumping, manually bump the `a` number E.G. `1.5.6a1` becomes `1.5.6a2`
+    c) pulling in changes from upstream should bump the pydantic version, and update the `a` number to `1` E.G updating from upstream `pydantic == 1.5.7` will change our version from `1.5.6a2` to `1.5.7a1`
+2) commit the change, and tag it with the current version in `pydantic/version.py` E.G `pydantic/version::VERSION = '1.5.7a1'` run `git tag v1.5.7a1`
+3) push commit and tag to master, CI will take over `git push origin gain-master --tags`
+
 # pydantic
 
 [![CI](https://github.com/samuelcolvin/pydantic/workflows/CI/badge.svg?event=push)](https://github.com/samuelcolvin/pydantic/actions?query=event%3Apush+branch%3Amaster+workflow%3ACI)
